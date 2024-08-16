@@ -18,7 +18,8 @@ service AccountingDocument {
         
     }
 }
-annotate AccountingDocument.accdoc with  @odata.draft.enabled ;
+//annotate AccountingDocument.accdoc with  @odata.draft.enabled ;
+annotate AccountingDocument.AccountingDocumentItems with  @odata.draft.enabled ;
 
 
 annotate AccountingDocument.accdoc with @(
@@ -46,43 +47,40 @@ annotate AccountingDocument.accdoc with @(
             Value: AccountingDocumentType
         },
     ],
-    // UI.FieldGroup #accountingdocument: {
-    //     $Type: 'UI.FieldGroupType',
-    //     Data : [
-    //     {
-    //         Label: 'Company Code',
-    //         Value: CompanyCode
-    //     },
-    //     {
-    //         Label: 'Fiscal Year',
-    //         Value: FiscalYear
-    //     },
-    //     {
-    //         Label: 'Fiscal Period',
-    //         Value: FiscalPeriod
-    //     },
-    //     {
-    //         Label: 'Accounting Document',
-    //         Value: AccountingDocument
-    //     },
-    //      {
-    //         Label: 'Accounting Document Item',
-    //         Value: AccountingDocumentItem
-    //     },
-    //     {
-    //         Label: 'Document Type',
-    //         Value: AccountingDocumentType
-    //     },
+    UI.FieldGroup #accountingdocument: {
+        $Type: 'UI.FieldGroupType',
+        Data : [
+        {
+            Label: 'Company Code',
+            Value: CompanyCode
+        },
+        {
+            Label: 'Fiscal Year',
+            Value: FiscalYear
+        },
+        {
+            Label: 'Fiscal Period',
+            Value: FiscalPeriod
+        },
+        {
+            Label: 'Accounting Document',
+            Value: AccountingDocument
+        },
+        
+        {
+            Label: 'Document Type',
+            Value: AccountingDocumentType
+        },
        
-    //     ],
-    // },
+        ],
+    },
     UI.Facets             : [
-    //     {
-    //     $Type : 'UI.ReferenceFacet',
-    //     ID    : 'doc_facet',
-    //     Label : 'Document',
-    //     Target: '@UI.FieldGroup#accountingdocument'
-    // },
+        {
+        $Type : 'UI.ReferenceFacet',
+        ID    : 'doc_facet',
+        Label : 'Document',
+        Target: '@UI.FieldGroup#accountingdocument'
+    },
     {
             $Type : 'UI.ReferenceFacet',
             ID    : 'doc_items_facet',
@@ -98,7 +96,7 @@ annotate AccountingDocument.AccountingDocumentItems with @(
      UI.LineItem           : [
         {
             Label: 'AccountingDocument',
-            Value: AccountingDocument.AccountingDocument
+            Value: AccountingDocument
         },
         {
             Label: 'AccountingDocumentItem',

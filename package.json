@@ -10,7 +10,8 @@
     "@sap-cloud-sdk/http-client": "^3.18.0",
     "@sap-cloud-sdk/resilience": "^3.18.0",
     "@sap/cds": "^7",
-    "express": "^4"
+    "express": "^4",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^1"
