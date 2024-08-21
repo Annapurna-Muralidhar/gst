@@ -7,8 +7,8 @@ entity AccountingDocument :cuid,managed {
     FiscalYear:String(4);
     FiscalPeriod:String(3);
     AccountingDocument:String(10);
-   
     AccountingDocumentType:String(2); 
+    LastChangeDate:DateTime;
     AccountingDocumentItems :Composition of  many AccountingDocumentItems on AccountingDocumentItems.AccountingDocument=$self.AccountingDocument and AccountingDocumentItems.CompanyCode = $self.CompanyCode 
                                             and AccountingDocumentItems.FiscalYear = $self.FiscalYear;
 }
@@ -23,5 +23,6 @@ entity AccountingDocumentItems : cuid,managed {
    TaxCode:String(2);
    GLAccount:String(10);
    TransactionTypeDetermination:String(3);
+   AmountInCompanyCodeCurrency:Decimal
    
 }

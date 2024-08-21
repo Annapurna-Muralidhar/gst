@@ -1,8 +1,14 @@
 using {com.satinfotech.gst as gstp} from '../db/schema';
 using {API_OPLACCTGDOCITEMCUBE_SRV as accountingapi} from './external/API_OPLACCTGDOCITEMCUBE_SRV';
-service AccountingDocument {
-    entity accdoc as projection on gstp.AccountingDocument;
-    entity AccountingDocumentItems as projection on gstp.AccountingDocumentItems;   
+service AccountingDocument  {
+    entity accdoc as projection on gstp.AccountingDocument actions{
+            action loaddata() returns Boolean;
+    };
+    
+
+    
+    
+    entity AccountingDocumentItems as projection on gstp.AccountingDocumentItems;
     entity accounting as projection on accountingapi.A_OperationalAcctgDocItemCube{
         CompanyCode,
         FiscalYear,
@@ -13,10 +19,12 @@ service AccountingDocument {
         TaxCode,
         GLAccount,
         TransactionTypeDetermination,
-        CompanyCodeCurrency
+        CompanyCodeCurrency,
+        AmountInCompanyCodeCurrency,
+        LastChangeDate
         
-        
-    }
+    } 
+    //actions{ action fetch() returns Boolean }
 }
 //annotate AccountingDocument.accdoc with  @odata.draft.enabled ;
 annotate AccountingDocument.AccountingDocumentItems with  @odata.draft.enabled ;
@@ -46,6 +54,10 @@ annotate AccountingDocument.accdoc with @(
             Label: 'Document Type',
             Value: AccountingDocumentType
         },
+         {
+            Label: 'LastChangeDate',
+            Value: LastChangeDate
+        },
     ],
     UI.FieldGroup #accountingdocument: {
         $Type: 'UI.FieldGroupType',
@@ -70,6 +82,10 @@ annotate AccountingDocument.accdoc with @(
         {
             Label: 'Document Type',
             Value: AccountingDocumentType
+        },
+         {
+            Label: 'LastChangeDate',
+            Value: LastChangeDate
         },
        
         ],
@@ -113,6 +129,10 @@ annotate AccountingDocument.AccountingDocumentItems with @(
         {
             Label: 'TransactionTypeDetermination',
             Value: TransactionTypeDetermination
+        },
+        {
+            Label: 'AmountInCompanyCodeCurrency',
+            Value: AmountInCompanyCodeCurrency
         },
     ],
     // UI.FieldGroup #accountingdocumentitems: {
