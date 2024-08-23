@@ -7,23 +7,23 @@
 //     const { accounting, accdoc,AccountingDocumentItems } = this.entities; // Only use local entities
 
 //     this.on('READ', 'accounting', async (req) => {
-//         const query = req.query
+//         const query1 = req.query1
 //             .where({ AccountingDocumentType: { in: ['RV', 'RE', 'DR', 'KR', 'DG', 'KG'] } })
 //             .and({ CompanyCodeCurrency: 'INR' });
         
-//         const result = await accountingapi.run(query);
+//         const result = await accountingapi.run(query1);
         
 //         return result;
 //     });
     
 
 //     this.before('READ', 'accdoc', async (req) => {
-//         const query = SELECT.from(accounting)
+//         const query1 = SELECT.from(accounting)
 //             .columns('CompanyCode', 'FiscalYear', 'FiscalPeriod', 'AccountingDocument', 'AccountingDocumentType','LastChangeDate')
 //             .where({ AccountingDocumentType: { in: ['RV', 'RE', 'DR', 'KR', 'DG', 'KG'] } })
 //             .and({ CompanyCodeCurrency: 'INR' });
     
-//         const res = await accountingapi.run(query);
+//         const res = await accountingapi.run(query1);
 //         //console.log('Fetched records:', res);
     
 //         // Group records by CompanyCode, FiscalYear, and AccountingDocument
@@ -78,12 +78,12 @@
 
 // this.before('READ', 'AccountingDocumentItems', async (req) => {
 //     // Fetch records from the source
-//     const query = SELECT.from(accounting)
+//     const query1 = SELECT.from(accounting)
 //         .columns('AccountingDocument', 'AccountingDocumentItem', 'TaxCode', 'GLAccount', 'TransactionTypeDetermination', 'CompanyCode', 'FiscalYear','AmountInCompanyCodeCurrency')
 //         .where({ AccountingDocumentType: { in: ['RV', 'RE', 'DR', 'KR', 'DG', 'KG'] } })
 //         .and({ CompanyCodeCurrency: 'INR' });
 
-//     const sourceRecords = await accountingapi.run(query);
+//     const sourceRecords = await accountingapi.run(query1);
 //     console.log('Fetched records:', sourceRecords);
 
 //     // Add UUID to each record
@@ -133,15 +133,6 @@
 //             return true;
 //         })
 //     })
-        
-        
-        
-   
-    
-    
-    
-    
-    
     
 // });
 
@@ -164,18 +155,143 @@ taxdocitems = []
             console.log("In Batch ",i," of ",counttaxdocs, " records");
             await cds.run(UPSERT.into(LGSTTaxItem).entries(results));
             //taxdocitems.push(...results);
-        }
+        }   
             
 */
 
-const cds = require('@sap/cds');
+// const cds = require('@sap/cds');
+// const { v4: uuidv4 } = require('uuid');
+// module.exports = cds.service.impl(async function() {
+//     const accountingapi = await cds.connect.to('API_OPLACCTGDOCITEMCUBE_SRV');
+//     const { accounting, accdoc,AccountingDocumentItems } = this.entities;
+//     this.on('buttonController', async (req) => {
+//         console.log("button clicked");
 
-module.exports = cds.service.impl(async function() {
+//         //accdoc
+
+//         const query=SELECT.from(accounting)
+//         .columns('CompanyCode', 'FiscalYear', 'FiscalPeriod', 'AccountingDocument', 'AccountingDocumentType','LastChangeDate')
+//         .where({ AccountingDocumentType: { in: ['RV', 'RE', 'DR', 'KR', 'DG', 'KG'] } })
+//         .and({ CompanyCodeCurrency: 'INR' });
+//         const res = await accountingapi.run(query);
+//         const groupMap = new Map();
+//         res.forEach(item => {
+//             const groupKey = `${item.CompanyCode}-${item.FiscalYear}-${item.AccountingDocument}`;
+//             if (!groupMap.has(groupKey)) {
+//                 item.ID = uuidv4();
+//                 groupMap.set(groupKey, item);  // Store only one record per group
+//             }
+//         });
+//         const groupedData = [];
+//         groupMap.forEach(group => groupedData.push(group));
+//         console.log('Grouped records:', groupedData);
+//         const existingRecords = await cds.run(
+//             SELECT.from(accdoc)
+//             .columns('CompanyCode', 'FiscalYear', 'AccountingDocument')
+//             .where({
+//                 CompanyCode: { in: groupedData.map(r => r.CompanyCode) },
+//                 FiscalYear: { in: groupedData.map(r => r.FiscalYear) },
+//                 AccountingDocument: { in: groupedData.map(r => r.AccountingDocument) }
+//                 })
+//         );
+//         const newRecords = groupedData.filter(groupedRecord => {
+//             return !existingRecords.some(existingRecord =>
+//                 existingRecord.CompanyCode === groupedRecord.CompanyCode &&
+//                 existingRecord.FiscalYear === groupedRecord.FiscalYear &&
+//                 existingRecord.AccountingDocument === groupedRecord.AccountingDocument
+//                 );
+//         });
+//         if (newRecords.length > 0) {
+//                         await cds.run(UPSERT.into(accdoc).entries(newRecords));
+                        
+//                     } else {
+//                         console.log('No new records to insert.');
+//                     }
+//         //return "result";
+
+//         //accdoc items
+    
+//     });
+// });
+
+const cds = require('@sap/cds');
+const { v4: uuidv4 } = require('uuid');
+
+module.exports = cds.service.impl(async function () {
+    const accountingapi = await cds.connect.to('API_OPLACCTGDOCITEMCUBE_SRV');
+    const { accounting, accdoc } = this.entities;
+
     this.on('buttonController', async (req) => {
-        await cds.tx (async () =>{
-            
-                        console.log("button clicked");
-                        return "================clicked==================";
-                    })
+        console.log("Button clicked");
+
+        // Query the latest LastChangeDate from the local database
+        const lastSyncRecord = await cds.run(
+            SELECT.one.columns('LastChangeDate')
+                .from(accdoc)
+                .orderBy('LastChangeDate desc')
+        );
+
+    
+        let totalRecordsCount;
+        
+        // Determine if this is an initial load or filtered load
+        if (lastSyncRecord && lastSyncRecord.LastChangeDate) {
+            let lastSyncDate = lastSyncRecord.LastChangeDate;
+            lastSyncDate=lastSyncDate.slice(0,-1);
+            // Filter the API call based on LastChangeDate
+            //queryPath += `/$count?$filter=LastChangeDate gt datetime'${lastSyncDate}'`;
+            totalRecordsCount = await accountingapi.send({ method: 'GET', path: "/A_OperationalAcctgDocItemCube/$count?$filter=LastChangeDate gt datetime'"+lastSyncDate+"'" });
+        } else {
+            // Initial load: no filtering
+            //queryPath += `/$count`;
+            totalRecordsCount = await accountingapi.send({ method: 'GET', path:  "A_OperationalAcctgDocItemCube/$count" });
+        }
+
+        // Now batch the requests and process in batches of 5000
+        const batchSize = 5000;
+        let startIndex = 0;
+
+        while (startIndex < totalRecordsCount) {
+            let batchQuery = SELECT.from(accounting)
+                .columns('CompanyCode', 'FiscalYear', 'FiscalPeriod', 'AccountingDocument', 'AccountingDocumentType', 'LastChangeDate')
+                .where({ AccountingDocumentType: { in: ['RV', 'RE', 'DR', 'KR', 'DG', 'KG'] } })
+                .and({ CompanyCodeCurrency: 'INR' })
+                .limit(batchSize, startIndex);
+
+            if (lastSyncRecord && lastSyncRecord.LastChangeDate) {
+                batchQuery = batchQuery.and({ LastChangeDate: { '>': lastSyncRecord.LastChangeDate } });
+            }
+
+            // Fetch records from the external API in batches
+            const batchResults = await accountingapi.run(batchQuery);
+            console.log(`Processing batch starting at index ${startIndex} of ${totalRecordsCount} records`);
+
+            // Prepare grouped records
+            const groupMap = new Map();
+            batchResults.forEach(item => {
+                const groupKey = `${item.CompanyCode}-${item.FiscalYear}-${item.AccountingDocument}`;
+                if (!groupMap.has(groupKey)) {
+                    item.ID = uuidv4();  // Assign a unique ID
+                    groupMap.set(groupKey, item);  // Store one record per group
+                }
+            });
+
+            // Convert grouped data to an array
+            const groupedData = [];
+            groupMap.forEach(group => groupedData.push(group));
+
+            // Insert records into the local database
+            if (groupedData.length > 0) {
+                await cds.run(UPSERT.into(accdoc).entries(groupedData));
+            }
+
+            startIndex += batchSize;  // Move to the next batch
+        }
+
+        if (totalRecordsCount === 0) {
+            console.log('No new records to insert after the latest LastChangeDate.');
+        } else {
+            console.log('All batches processed successfully.');
+        }
     });
 });
