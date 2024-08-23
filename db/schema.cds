@@ -20,6 +20,7 @@ entity AccountingDocumentItems : cuid,managed {
     FiscalYear:String(4);
     AccountingDocument:String(10);
     AccountingDocumentItem : String(10);
+    LastChangeDate:DateTime;
    TaxCode:String(2);
    GLAccount:String(10);
    TransactionTypeDetermination:String(3);
