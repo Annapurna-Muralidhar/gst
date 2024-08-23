@@ -1,79 +1,78 @@
 
-const cds = require('@sap/cds');
-const { v4: uuidv4 } = require('uuid'); // Import UUID library
+// const cds = require('@sap/cds');
+// const { v4: uuidv4 } = require('uuid'); // Import UUID library
 
-module.exports = cds.service.impl(async function() {
-    const accountingapi = await cds.connect.to('API_OPLACCTGDOCITEMCUBE_SRV');
-    const { accounting, accdoc,AccountingDocumentItems } = this.entities; // Only use local entities
+// module.exports = cds.service.impl(async function() {
+//     const accountingapi = await cds.connect.to('API_OPLACCTGDOCITEMCUBE_SRV');
+//     const { accounting, accdoc,AccountingDocumentItems } = this.entities; // Only use local entities
 
-    // Custom Read Handler for 'accounting' entity
-    // this.on('READ', 'accounting', async (req) => {
-    //     const query = req.query
-    //         .where({ AccountingDocumentType: { in: ['RV', 'RE', 'DR', 'KR', 'DG', 'KG'] } })
-    //         .and({ CompanyCodeCurrency: 'INR' });
+//     this.on('READ', 'accounting', async (req) => {
+//         const query = req.query
+//             .where({ AccountingDocumentType: { in: ['RV', 'RE', 'DR', 'KR', 'DG', 'KG'] } })
+//             .and({ CompanyCodeCurrency: 'INR' });
         
-    //     const result = await accountingapi.run(query);
+//         const result = await accountingapi.run(query);
         
-    //     return result;
-    // });
+//         return result;
+//     });
     
 
-    // this.before('READ', 'accdoc', async (req) => {
-    //     const query = SELECT.from(accounting)
-    //         .columns('CompanyCode', 'FiscalYear', 'FiscalPeriod', 'AccountingDocument', 'AccountingDocumentType','LastChangeDate')
-    //         .where({ AccountingDocumentType: { in: ['RV', 'RE', 'DR', 'KR', 'DG', 'KG'] } })
-    //         .and({ CompanyCodeCurrency: 'INR' });
+//     this.before('READ', 'accdoc', async (req) => {
+//         const query = SELECT.from(accounting)
+//             .columns('CompanyCode', 'FiscalYear', 'FiscalPeriod', 'AccountingDocument', 'AccountingDocumentType','LastChangeDate')
+//             .where({ AccountingDocumentType: { in: ['RV', 'RE', 'DR', 'KR', 'DG', 'KG'] } })
+//             .and({ CompanyCodeCurrency: 'INR' });
     
-    //     const res = await accountingapi.run(query);
-    //     //console.log('Fetched records:', res);
+//         const res = await accountingapi.run(query);
+//         //console.log('Fetched records:', res);
     
-    //     // Group records by CompanyCode, FiscalYear, and AccountingDocument
-    //     const groupMap = new Map();
-    //     res.forEach(item => {
-    //         const groupKey = `${item.CompanyCode}-${item.FiscalYear}-${item.AccountingDocument}`;
-    //         if (!groupMap.has(groupKey)) {
-    //             item.ID = uuidv4();
-    //             groupMap.set(groupKey, item);  // Store only one record per group
-    //         }
-    //     });
+//         // Group records by CompanyCode, FiscalYear, and AccountingDocument
+//         const groupMap = new Map();
+//         res.forEach(item => {
+//             const groupKey = `${item.CompanyCode}-${item.FiscalYear}-${item.AccountingDocument}`;
+//             if (!groupMap.has(groupKey)) {
+//                 item.ID = uuidv4();
+//                 groupMap.set(groupKey, item);  // Store only one record per group
+//             }
+//         });
     
-    //     const groupedData = [];
-    //     groupMap.forEach(group => groupedData.push(group));
-    //     console.log('Grouped records:', groupedData);
+//         const groupedData = [];
+//         groupMap.forEach(group => groupedData.push(group));
+//         console.log('Grouped records:', groupedData);
     
-    //     // Perform a bulk UPSERT using a single operation
-    //     const existingRecords = await cds.run(
-    //         SELECT.from(accdoc)
-    //             .columns('CompanyCode', 'FiscalYear', 'AccountingDocument')
-    //             .where({
-    //                 CompanyCode: { in: groupedData.map(r => r.CompanyCode) },
-    //                 FiscalYear: { in: groupedData.map(r => r.FiscalYear) },
-    //                 AccountingDocument: { in: groupedData.map(r => r.AccountingDocument) }
-    //             })
-    //     );
+//         // Perform a bulk UPSERT using a single operation
+//         const existingRecords = await cds.run(
+//             SELECT.from(accdoc)
+//                 .columns('CompanyCode', 'FiscalYear', 'AccountingDocument')
+//                 .where({
+//                     CompanyCode: { in: groupedData.map(r => r.CompanyCode) },
+//                     FiscalYear: { in: groupedData.map(r => r.FiscalYear) },
+//                     AccountingDocument: { in: groupedData.map(r => r.AccountingDocument) }
+//                 })
+//         );
     
-    //     // Filter out the already existing records
-    //     const newRecords = groupedData.filter(groupedRecord => {
-    //         return !existingRecords.some(existingRecord =>
-    //             existingRecord.CompanyCode === groupedRecord.CompanyCode &&
-    //             existingRecord.FiscalYear === groupedRecord.FiscalYear &&
-    //             existingRecord.AccountingDocument === groupedRecord.AccountingDocument
-    //         );
-    //     });
+//         // Filter out the already existing records
+//         const newRecords = groupedData.filter(groupedRecord => {
+//             return !existingRecords.some(existingRecord =>
+//                 existingRecord.CompanyCode === groupedRecord.CompanyCode &&
+//                 existingRecord.FiscalYear === groupedRecord.FiscalYear &&
+//                 existingRecord.AccountingDocument === groupedRecord.AccountingDocument
+//             );
+//         });
     
-    //     if (newRecords.length > 0) {
-    //         await cds.run(UPSERT.into(accdoc).entries(newRecords));
-    //         //console.log('Inserted new records:', newRecords);
-    //     } else {
-    //         //console.log('No new records to insert.');
-    //     }
-    // });
+//         if (newRecords.length > 0) {
+//             await cds.run(UPSERT.into(accdoc).entries(newRecords));
+//             //console.log('Inserted new records:', newRecords);
+//         } else {
+//             //console.log('No new records to insert.');
+//         }
+//     });
 
        
     
        
   
-    //const { v4: uuidv4 } = require('uuid'); // Import UUID library
+//     const { v4: uuidv4 } = require('uuid'); // Import UUID library
 
 
 
@@ -127,11 +126,16 @@ module.exports = cds.service.impl(async function() {
 //     }
 // });
 
-    this.on('loaddata',async (req)=>{
-        console.log("button clicked");
-        return true;
+//     this.on('buttonController',async ()=>{
+//         await cds.tx (async () =>{
+            
+//             console.log("button clicked");
+//             return true;
+//         })
+//     })
         
-    })
+        
+        
    
     
     
@@ -139,7 +143,7 @@ module.exports = cds.service.impl(async function() {
     
     
     
-});
+// });
 
 
 
@@ -164,3 +168,14 @@ taxdocitems = []
             
 */
 
+const cds = require('@sap/cds');
+
+module.exports = cds.service.impl(async function() {
+    this.on('buttonController', async (req) => {
+        await cds.tx (async () =>{
+            
+                        console.log("button clicked");
+                        return "================clicked==================";
+                    })
+    });
+});

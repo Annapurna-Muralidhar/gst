@@ -5,37 +5,28 @@ sap.ui.define([
     'use strict';
 
     return {
-        loadData: function(oBindingContext, aSelectedContexts) {
+        loadData: function() {
             MessageToast.show("Custom handler invoked.");
-
-            // Debugging: Log the binding context and selected contexts
-            console.log("oBindingContext: ", oBindingContext);
-            console.log("aSelectedContexts: ", aSelectedContexts);
-
-            // Check if the selected contexts array is valid
-            if (aSelectedContexts && aSelectedContexts.length > 0 && aSelectedContexts[0]) {
-                const context = aSelectedContexts[0]; // First selected context
-                
-                // Log the context to ensure it's valid
-                console.log("Selected context: ", context);
-
-                // Invoke the bound action with the selected context
-                this.editFlow.invokeAction('AccountingDocument/loaddata', {
-                    contexts: [context] // Pass the context to the invokeAction
+            // let  model= this._view.getModel()
+            // console.log(model instanceof sap.ui.model.odata.v2.ODataModel);
+            // console.log(model.getServiceUrl()); 
+            // console.log(model.getMetadata()); 
+            
+                this.editFlow.invokeAction('AccountingDocument/buttonController', {
+                    model: this._view.getModel(),
+                    
                 }).then(function(result) {
                     console.log("Action executed successfully.");
-                    BusyIndicator.show();
-                    console.log(result.value);
-                    context.getModel().refresh();
-                }).catch(function(error) {
-                    console.error("Error invoking action:", error);
-                }).finally(function() {
-                    BusyIndicator.hide();
-                });
+                  
+                    console.log(result);
+                      
+                })
 
-            } else {
-                console.error("No context provided for the bound action.");
+                
             }
+            
         }
-    };
-});
+    }
+    
+);
+
