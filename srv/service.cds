@@ -2,7 +2,7 @@ using {com.satinfotech.gst as gstp} from '../db/schema';
 using {API_OPLACCTGDOCITEMCUBE_SRV as accountingapi} from './external/API_OPLACCTGDOCITEMCUBE_SRV';
 service AccountingDocument  {
     entity accdoc as projection on gstp.AccountingDocument  ;
-    action buttonController() returns String;
+    action buttonController() returns Boolean;
 
     
     entity AccountingDocumentItems as projection on gstp.AccountingDocumentItems;
@@ -87,6 +87,7 @@ annotate AccountingDocument.accdoc with @(
        
         ],
     },
+    UI.SelectionFields: [ FiscalYear ,AccountingDocument,AccountingDocumentType],
     UI.Facets             : [
         {
         $Type : 'UI.ReferenceFacet',
