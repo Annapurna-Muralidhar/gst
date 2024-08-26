@@ -236,9 +236,9 @@ sap.ui.define([
                 showValue: true
             });
             const logDialog = new Dialog({
-                title: "Processing Logs",
-                contentWidth: "400px",
-                contentHeight: "400px",
+                title: "Processing Batches",
+                contentWidth: "900px",
+                contentHeight: "500px",
                 verticalScrolling: true,
                 content: new VBox({
                     items: [progressBar]
@@ -261,7 +261,7 @@ sap.ui.define([
 
                     if (result.value.value && result.value.value.logs) {
                         const logs = result.value.value.logs;
-                        const totalRecords = 13126; // Set this value dynamically based on actual total records
+                        const totalRecords = result.value.value.totalRecordsCountAccdoc; // Set this value dynamically based on actual total records
                         let processedRecords = 0;
                         let logIndex = 0;
                         const displayLog = function() {
@@ -289,6 +289,8 @@ sap.ui.define([
                                 }, 3000); 
                             }
                         };
+
+                        // Start displaying logs
                         displayLog();
                     }
                 },
